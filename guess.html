@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who's That Pokémon?</title>
+    <style>
+        /* CSS stays similar to maintain your layout */
+        body {
+            font-family: 'Trebuchet MS', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .game-container {
+            display: flex;
+            background: #333;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+            gap: 40px;
+            border: 4px solid #ffcc00;
+        }
+
+        .left-side {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #444, #000);
+            border-radius: 15px;
+            min-height: 300px;
+        }
+
+        #pokemon-img {
+            width: 250px;
+            filter: brightness(0); /* Shadow effect */
+            transition: filter 0.5s ease-in-out;
+        }
+
+        #pokemon-img.revealed {
+            filter: brightness(1); /* Reveal color */
+        }
+
+        .right-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        #message { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+        
+        input {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            background: #ffcc00;
+            transition: 0.3s;
+        }
+
+        button:hover { transform: scale(1.05); }
+        .restart-btn { background: #555; color: white; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <audio id="themeMusic" src="pokemon-theme.mp3" loop></audio>
+
+    <h1>Who's That Pokémon?</h1>
+
+    <div class="game-container">
+        <div class="left-side">
+            <img src="" id="pokemon-img">
+        </div>
+
+        <div class="right-side">
+            <div id="level-display" style="color: #ffcc00;">LEVEL: NORMAL</div>
+            <div id="message">Loading...</div>
+            <input type="text" id="guess-input" placeholder="Enter Name..." autocomplete="off">
+            <button onclick="checkGuess()">GUESS</button>
+            <button class="restart-btn" onclick="initGame()">NEXT POKÉMON</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPokemonName = "";
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        const img = document.getElementById('pokemon-img');
+        const input = document.getElementById('guess-input');
+        const message = document.getElementById('message');
+        const themeMusic = document.getElementById('themeMusic');
+
+        // Logic to resume music from homepage
+        window.addEventListener('click', () => {
+            if (localStorage.getItem("themeOn") === "true") {
+                themeMusic.play();
+                themeMusic.volume = 0.5;
+            }
+        }, { once: true }); // Only triggers on the first click to bypass browser blocks
+
+        async function initGame() {
+            attempts = 0;
+            img.classList.remove('revealed');
+            input.value = "";
+            input.disabled = false;
+            message.style.color = "white";
+            message.innerText = "Can you guess it?";
+
+            const randomId = Math.floor(Math.random() * 151) + 1;
+
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+                const data = await response.json();
+                currentPokemonName = data.name.toLowerCase();
+                img.src = data.sprites.other['official-artwork'].front_default;
+            } catch (error) {
+                message.innerText = "Error loading Pokémon!";
+            }
+        }
+
+        function checkGuess() {
+            const userGuess = input.value.toLowerCase().trim();
+
+            if (userGuess === currentPokemonName) {
+                revealResult("Correct! It's " + currentPokemonName.toUpperCase() + "!", "#4dff4d");
+            } else {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    revealResult("Out of turns! It was " + currentPokemonName.toUpperCase(), "#ffcc00");
+                } else {
+                    message.style.color = "#ff4747";
+                    message.innerText = `Wrong! ${maxAttempts - attempts} attempts left.`;
+                }
+            }
+        }
+
+        function revealResult(msg, color) {
+            img.classList.add('revealed');
+            message.style.color = color;
+            message.innerText = msg;
+            input.disabled = true;
+        }
+
+        // Allow 'Enter' key to submit guess
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") checkGuess();
+        });
+
+        initGame();
+    </script>
+</body>
+</html>
+
+
