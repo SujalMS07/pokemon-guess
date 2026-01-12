@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guess The Pokémon</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Trebuchet MS', sans-serif;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+/* BACKGROUND IMAGE */
+#bgImage{
+    position:fixed;
+    inset:0;
+    background:
+        linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.75)),
+        url("ash-pikachu.png") center/cover no-repeat;
+    z-index:-1;
+}
+
+/* HERO CONTENT */
+.hero{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:#fff;
+}
+
+.title{
+    font-size:64px;
+    font-weight:900;
+    letter-spacing:3px;
+    color:#ffcc00;
+    text-shadow:0 0 20px #ffcc00;
+    margin-bottom:20px;
+}
+
+.subtitle{
+    font-size:18px;
+    opacity:0.85;
+    margin-bottom:40px;
+}
+
+button{
+    padding:18px 50px;
+    font-size:20px;
+    font-weight:bold;
+    border:none;
+    border-radius:40px;
+    cursor:pointer;
+    background:linear-gradient(135deg,#ffcc00,#ff9900);
+    box-shadow:0 0 25px rgba(255,204,0,0.8);
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 40px rgba(255,204,0,1);
+}
+</style>
+</head>
+
+<body>
+
+<div id="bgImage"></div>
+
+<div class="hero">
+    <div class="title">GUESS THE POKÉMON</div>
+    <div class="subtitle">Can you recognize them from the shadows?</div>
+    <button onclick="startGame()">⚡ Start Game</button>
+</div>
+
+<audio id="themeMusic" src="pokemon-theme.mp3" loop></audio>
+<audio id="pikaSound" src="pikachu.mp3"></audio>
+
+<script>
+const themeMusic = document.getElementById("themeMusic");
+const pikaSound = document.getElementById("pikaSound");
+
+function startGame(){
+    // 1. Play Pika Sound
+    pikaSound.currentTime = 0;
+    pikaSound.play();
+
+    // 2. Play Theme Music
+    themeMusic.volume = 0.6;
+    themeMusic.play();
+
+    // 3. Save the current time of the music so guess.html knows where to pick up
+    localStorage.setItem("themePlaying", "true");
+
+    // Redirect after 1 second (to allow the Pika sound to finish)
+    setTimeout(() => {
+        window.location.href = "guess.html";
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
+
+
+
+
